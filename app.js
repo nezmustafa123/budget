@@ -232,6 +232,40 @@ var UIController = (function(){
         expensesPercLabel: '.item__percentage'
 	};
     
+    
+   var formatNumber = function(num, type) {
+            var numSplit, int, dec
+            /*
+            add + or - beofre number 
+            round to two decimal places
+            comma seperating the thousands
+            
+            2310.4567 -> + 2.310.46
+            
+            2000 -> + 2,000.00
+            
+            */
+            num = Math.abs(num); 
+            num = num.toFixed(2);
+            //will return string
+            numSplit = num.split('.');
+            
+            int = numSplit[0];
+            //if the number is greater than thousand
+            if(int.length > 3) {
+                //first number is index where we want to start
+                //second number is how many nubmers you wish to read
+               int =  int.substr(0, int.length - 3) + ',' + int.substr(int.length-3,3);
+            }
+            
+            //split the number from the decimal point
+            dec = numSplit[1];
+            
+//            type === 'exp' ? sign = '-' : sign = '+';
+             return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
+            
+        };
+    
 	return {
 		getinput: function() {
 			return {
@@ -251,7 +285,7 @@ var UIController = (function(){
 //			var value = document.querySelector('.add__value').value;
 			},
         
-        addListItem: function(obj, type) {
+            addListItem: function(obj, type) {
             //the item will be the object it's self and the type if it's an income object or an expense object
             var html, newHtml, element;
              //create HTML string with placeholder text
@@ -271,7 +305,7 @@ var UIController = (function(){
             
             newHtml = html.replace('%id%', obj.id);
             newHtml = newHtml.replace('%description%', obj.description);
-            newHtml = newHtml.replace('%value%', obj.value);
+            newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
             
             //insert the HTML into the DOM
             //as a child of either incomme or expenses
@@ -279,23 +313,23 @@ var UIController = (function(){
             
             },
         
-        deleteListItem: function(selectorID) {
-            var el = document.getElementById(selectorID);
-           el.parentNode.removeChild(el)
-        },
+           deleteListItem: function(selectorID) {
+             var el = document.getElementById(selectorID);
+             el.parentNode.removeChild(el)
+            },
         
         
         
-        clearFields: function() {
-        var fields, fieldsArr;
-            //convert html list into array
-           fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
-            //call method set this variable as field tricking slice method to think it is returning array
-           fieldsArr = Array.prototype.slice.call(fields);
-            
-           fieldsArr.forEach(function(current, index, array) {
-                current.value = "";
-          });
+        clearFields: function () {
+                var fields, fieldsArr;
+                //convert html list into array
+                fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+                //call method set this variable as field tricking slice method to think it is returning array
+                fieldsArr = Array.prototype.slice.call(fields);
+
+                fieldsArr.forEach(function (current, index, array) {
+                    current.value = "";
+                });
             
             //set focus on first element
             
@@ -303,10 +337,13 @@ var UIController = (function(){
         },
         
          displayBudget: function(obj) {
-             document.querySelector(DOMstrings.budgetLabel).textContent =  obj.budget;
-             document.querySelector(DOMstrings.incomeLabel).textContent =  obj.totalInc;
-             document.querySelector(DOMstrings.expensesLabel).textContent =  obj.totalExp;
-             document.querySelector(DOMstrings.percentageLabel).textContent =  obj.percentage;
+             var type;
+             obj.budget > 0 ? type = 'inc' : type = 'exp';
+             
+             document.querySelector(DOMstrings.budgetLabel).textContent =  formatNumber(obj.budget, type);
+             document.querySelector(DOMstrings.incomeLabel).textContent =  formatNumber(obj.totalInc, 'inc');
+             document.querySelector(DOMstrings.expensesLabel).textContent =  formatNumber(obj.totalExp, 'exp');
+//             document.querySelector(DOMstrings.percentageLabel).textContent =  obj.percentage;
              
              
              if (obj.percentage > 0) {
@@ -317,32 +354,32 @@ var UIController = (function(){
          },
         
         //recieve percentage array in app controller
-          displayPercentages: function(percentages) {
+          displayPercentages: function (percentages) {
               var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
-              
-              
-              var nodeListForEach = function(list, callback) {
-                  for (var i = 0; i < list.length; i ++) {
+
+
+              var nodeListForEach = function (list, callback) {
+                  for (var i = 0; i < list.length; i++) {
                       callback(list[i], i);
                   }
               };
-              
-              nodeListForEach(fields, function(current, index){
-                  
+
+              nodeListForEach(fields, function (current, index) {
+
                   //do stuff
-                  
-                 if(percentages[index] > 0){
-                current.textContent = percentages[index] + '%';
-              } else {
-                  current.textContent = '---';
-              }
-             });
+
+                  if (percentages[index] > 0) {
+                      current.textContent = percentages[index] + '%';
+                  } else {
+                      current.textContent = '---';
+                  }
+              });
           },
-         
+           
         
         
         
-		  getDOMstrings: function() {
+         getDOMstrings: function() {
 			return DOMstrings;
 		}
 		//inside the return statement a new method
@@ -354,28 +391,27 @@ var UIController = (function(){
 //app controller for the data
 //modules can recieve arguments 
 //can pass arguments into them
-var controller = (function(budgetCtrl, UICtrl) {
-	//init function
-    var setupEventListeners = function() { 
-    var DOM = UICtrl.getDOMstrings();
-        //in this controller it's called dom
-    //call the additem function
-	document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
-	
-	//global document event
-	document.addEventListener('keypress', function(e){
-		//function recieves event object
-//		console.log(e);
-		
-		if(event.keyCode === 13 || event.which === 13){
-			ctrlAddItem();
-          }
-		//call methods from UI and budget controller here
-		});
-        
-        //atach event handler to parent element to catch the event as it bubbles up
-        document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
-        //will be called when someone clicks on container
+     var controller = (function(budgetCtrl, UICtrl) {
+	    //init function
+	        var setupEventListeners = function () {
+	        var DOM = UICtrl.getDOMstrings();
+	        //in this controller it's called dom
+	        //call the additem function
+	        document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
+
+	        //global document event
+	        document.addEventListener('keypress', function (e) {
+	            //function recieves event object
+	            //		console.log(e);
+
+	            if (event.keyCode === 13 || event.which === 13) {
+	                ctrlAddItem();
+	            }
+	            //call methods from UI and budget controller here
+	        });
+            //atach event handler to parent element to catch the event as it bubbles up
+	        document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
+	        //will be called when someone clicks on container
     };
     
     
