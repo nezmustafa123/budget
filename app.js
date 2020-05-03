@@ -229,7 +229,8 @@ var UIController = (function(){
         expensesLabel: '.budget__expenses--value',
         percentageLabel: '.budget__expenses--percentage',
         container: '.container',
-        expensesPercLabel: '.item__percentage'
+        expensesPercLabel: '.item__percentage',
+        dateLabel: '.budget__title--month'
 	};
     
     
@@ -265,6 +266,15 @@ var UIController = (function(){
              return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
             
         };
+    
+    
+       var nodeListForEach = function (list, callback) {
+                  for (var i = 0; i < list.length; i++) {
+                      callback(list[i], i);
+                  }
+            };
+    
+    
     
 	return {
 		getinput: function() {
@@ -358,11 +368,6 @@ var UIController = (function(){
               var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
 
 
-              var nodeListForEach = function (list, callback) {
-                  for (var i = 0; i < list.length; i++) {
-                      callback(list[i], i);
-                  }
-              };
 
               nodeListForEach(fields, function (current, index) {
 
@@ -375,6 +380,39 @@ var UIController = (function(){
                   }
               });
           },
+        
+        displayMonth: function() {
+            //date ojbect constructor
+            var now, year, month;
+             now = new Date();
+            
+            months = ['January', 'Februay', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            //gives number because it's zero based
+            month = now.getMonth();
+        //var christmas = new Date(2016, 11, 25)
+              year = now.getFullYear();
+              
+            document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' '  + year;
+            
+        },
+        
+        changedType: function() {
+            //seperate lines because therer are three
+            var fields = document.querySelectorAll(
+             DOMstrings.inputType, + ',' +
+             DOMstrings.inputDescription + ',' + 
+             DOMstrings.inputvalue);
+        
+            
+            //use function to loop over selection
+            //red focus class on current element
+            nodeListForEach(fields, function(cur){
+                cur.classList.toggle('red-focus');
+                
+            });
+            
+            document.querySelector(DOMstrings.inputBtn).classList
+        },
            
         
         
@@ -412,6 +450,9 @@ var UIController = (function(){
             //atach event handler to parent element to catch the event as it bubbles up
 	        document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
 	        //will be called when someone clicks on container
+                
+                //change event
+            document.querySelector(DOM.inputType).addEventListener('change', UICtrl.changedType);
     };
     
     
@@ -487,6 +528,7 @@ var UIController = (function(){
     return {
         init: function() {
             console.log('Application has started. ');
+            UICtrl.displayMonth();
             //reset everything
             UICtrl.displayBudget({
                 budget: 0,
