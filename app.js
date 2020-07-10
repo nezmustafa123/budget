@@ -207,7 +207,7 @@ var budgetController = (function() {
 
 
 //immediately called variable and function declared and object is returned
-//the variavle is the object with method called public test
+//the variable is the object with method called public test
 //test method uses add and test variable after it has executed thanks to closures
 //iffe returns immediately
 
@@ -268,11 +268,18 @@ var UIController = (function(){
         };
     
     
+    
+    //this funcition is a  for loop that on each iteration will call out callback function
+    //accepts list and callback
        var nodeListForEach = function (list, callback) {
-                  for (var i = 0; i < list.length; i++) {
+           // for each iteration calls callback
+           //
+                  for (var i = 0; i < list.length; i++)  {
+                      //same parameters as callback
+                      //for each iteration the callback will be called
                       callback(list[i], i);
                   }
-            };
+            }
     
     
     
@@ -363,17 +370,20 @@ var UIController = (function(){
              }
          },
         
-        //recieve percentage array in app controller
+        //recieve percentage array from app controller
           displayPercentages: function (percentages) {
+              //returns a node list each element is called a node in dom list
               var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
 
 
-
+               //first two 
               nodeListForEach(fields, function (current, index) {
 
                   //do stuff
 
                   if (percentages[index] > 0) {
+                      //add percentage one two three etc
+                      //current text content of fields is percentages with % sign at the end
                       current.textContent = percentages[index] + '%';
                   } else {
                       current.textContent = '---';
@@ -390,7 +400,7 @@ var UIController = (function(){
             //gives number because it's zero based
             month = now.getMonth();
         //var christmas = new Date(2016, 11, 25)
-              year = now.getFullYear();
+            year = now.getFullYear();
               
             document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' '  + year;
             
@@ -415,9 +425,7 @@ var UIController = (function(){
         },
            
         
-        
-        
-         getDOMstrings: function() {
+        getDOMstrings: function() {
 			return DOMstrings;
 		}
 		//inside the return statement a new method
@@ -438,7 +446,7 @@ var UIController = (function(){
 	        document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
 
 	        //global document event
-	        document.addEventListener('keypress', function (e) {
+	        document.addEventListener('keypress', function(e) {
 	            //function recieves event object
 	            //		console.log(e);
 
